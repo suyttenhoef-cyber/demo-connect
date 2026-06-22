@@ -1,0 +1,28 @@
+{
+  "_comment": "Une entrée par commune. 'code' est optionnel : s'il est absent, generate.py en crée un (slug + suffixe aléatoire). Le code sert de nom de fichier ET de jeton dans codeUrlPattern de la démo.",
+  "communes": [
+    {
+      "commune": "CPAS de Gesves",
+      "collection": "CPASConnect",
+      "intro": "Suite à notre échange, voici notre proposition pour donner à l'ensemble de vos services un accès à la bibliothèque digitale de référence des CPAS. Vos agents y trouvent, en un seul endroit, la connaissance métier à jour et les outils pour gagner du temps au quotidien.",
+      "price": "1 950 €",
+      "priceDetail": "par an · HTVA",
+      "validUntil": "31/08/2026",
+      "rep": "Camille Dubois",
+      "repEmail": "camille.dubois@vandenbroele.be",
+      "repPhone": "02 308 29 00"
+    },
+    {
+      "commune": "CPAS d'Aubange",
+      "collection": "CPASConnect",
+      "intro": "Comme convenu, voici notre proposition d'abonnement à CPASConnect pour vos équipes. La licence couvre l'ensemble du personnel, sans coût par utilisateur.",
+      "price": "2 250 €",
+      "priceDetail": "par an · HTVA",
+      "validUntil": "30/09/2026",
+      "rep": "Thomas Lemaire",
+      "repEmail": "thomas.lemaire@vandenbroele.be",
+      "repPhone": "02 308 29 00",
+      "code": "aubange-7b21c"
+    }
+  ]
+}

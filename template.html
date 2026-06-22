@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<style>
+/* ============================================================
+   Modèle d'offre — Vanden Broele Connect
+   Les {{tokens}} sont remplacés par generate.py.
+   Rendu via WeasyPrint (HTML/CSS -> PDF).
+   ------------------------------------------------------------
+   Police : pour un rendu identique à la plateforme, installez
+   Source Sans Pro sur la machine OU décommentez @font-face et
+   pointez vers le fichier .woff2 local.
+   ============================================================ */
+/* @font-face{font-family:'Source Sans Pro';src:url('fonts/SourceSansPro-Regular.woff2');font-weight:400}
+   @font-face{font-family:'Source Sans Pro';src:url('fonts/SourceSansPro-SemiBold.woff2');font-weight:600}
+   @font-face{font-family:'Source Sans Pro';src:url('fonts/SourceSansPro-Bold.woff2');font-weight:700} */
+
+@page{
+  size:A4;
+  margin:0;
+}
+:root{
+  --navy:#113e67; --blue:#1c5fa0; --teal:#159b96;
+  --ink:#1d2a36; --muted:#5f6b78; --line:#e4e8ef; --soft:#f4f7fb;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans Pro','DejaVu Sans',sans-serif;color:var(--ink);font-size:11pt;line-height:1.5}
+.page{padding:0 0 90px}
+
+/* en-tête */
+.head{background:var(--navy);color:#fff;padding:26px 44px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:13px}
+.brand .lt{font-size:9.5pt;color:#bcd0e4;line-height:1}
+.brand .lb{font-size:18pt;font-weight:700;line-height:1.05}
+.head .doc{text-align:right;font-size:9pt;letter-spacing:.12em;text-transform:uppercase;color:#bcd0e4}
+.head .doc b{display:block;font-size:12pt;letter-spacing:.04em;color:#fff;font-weight:700;margin-top:3px}
+
+/* corps */
+.body{padding:34px 44px 0}
+.meta{display:flex;justify-content:space-between;font-size:9.5pt;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:24px}
+.meta b{color:var(--ink)}
+h1{font-size:19pt;color:var(--navy);font-weight:700;margin-bottom:6px;letter-spacing:-.01em}
+.sub{font-size:11pt;color:var(--blue);font-weight:600;margin-bottom:18px}
+p.lead{font-size:11pt;color:#34414e;margin-bottom:22px}
+
+.section-t{font-size:9pt;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:10px}
+.incl{margin-bottom:24px}
+.incl ul{list-style:none}
+.incl li{position:relative;padding:6px 0 6px 26px;font-size:10.5pt;border-bottom:1px solid var(--line)}
+.incl li:last-child{border:none}
+.incl li::before{content:"";position:absolute;left:2px;top:11px;width:12px;height:7px;border-left:2.4px solid var(--teal);border-bottom:2.4px solid var(--teal);transform:rotate(-45deg)}
+
+/* encadré prix */
+.price-box{background:var(--soft);border:1px solid #d7e3f1;border-left:5px solid var(--blue);border-radius:8px;padding:20px 24px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center}
+.price-box .pl{font-size:9pt;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.price-box .pv{font-size:24pt;color:var(--navy);font-weight:700;line-height:1.1}
+.price-box .pd{font-size:10pt;color:var(--muted);margin-top:2px}
+.price-box .pright{text-align:right;font-size:10pt;color:#34414e;max-width:46%}
+.price-box .pright b{color:var(--navy)}
+
+/* deux colonnes conditions + contact */
+.cols{display:flex;gap:30px;margin-bottom:8px}
+.col{flex:1}
+.col p,.col li{font-size:10pt;color:#34414e}
+.col ul{list-style:none}
+.col li{padding:4px 0 4px 16px;position:relative}
+.col li::before{content:"–";position:absolute;left:0;color:var(--blue)}
+.contact-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px 18px}
+.contact-card .cn{font-size:11pt;font-weight:700;color:var(--navy)}
+.contact-card .cr{font-size:9.5pt;color:var(--muted);margin-bottom:8px}
+.contact-card .ci{font-size:10pt;color:#34414e;padding:2px 0}
+
+/* pied de page fixe */
+.foot{position:fixed;bottom:0;left:0;right:0;background:var(--soft);border-top:1px solid var(--line);
+  padding:14px 44px;display:flex;justify-content:space-between;align-items:center;font-size:8.5pt;color:var(--muted)}
+.foot .bl{font-weight:700;color:var(--navy)}
+.foot .baseline{font-style:italic}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="head">
+    <div class="brand">
+      <!-- Emblème : remplacez par le vrai connect-emblem.svg en production -->
+      <svg width="40" height="40" viewBox="0 0 48 48">
+        <polygon points="24,4 42,14 24,24 6,14" fill="#4aa6dd"/>
+        <polygon points="6,14 24,24 24,44 6,34" fill="#2f78b8"/>
+        <polygon points="42,14 24,24 24,44 42,34" fill="#36b3ad"/>
+      </svg>
+      <div><div class="lt">Vanden Broele</div><div class="lb">Connect</div></div>
+    </div>
+    <div class="doc">Proposition commerciale<b>{{collection}}</b></div>
+  </div>
+
+  <div class="body">
+    <div class="meta">
+      <span>Référence : <b>{{reference}}</b></span>
+      <span>Date : <b>{{date}}</b> &nbsp;·&nbsp; Valable jusqu'au <b>{{validUntil}}</b></span>
+    </div>
+
+    <h1>{{commune}}</h1>
+    <div class="sub">Accès à la collection {{collection}}</div>
+
+    <p class="lead">{{intro}}</p>
+
+    <div class="incl">
+      <div class="section-t">Ce que comprend votre licence</div>
+      <ul>
+        <li>Accès illimité à toute la collection {{collection}} pour l'ensemble de vos agents</li>
+        <li>Documents, fiches pratiques, modèles et procédures à jour</li>
+        <li>Législation et jurisprudence commentées, mises à jour en continu</li>
+        <li>Livres et webbooks de référence du domaine</li>
+        <li>Assistant de recherche Assist (réponses en langage courant et renvoi aux sources)</li>
+        <li>Modules e-learning et accès à l'agenda des formations</li>
+      </ul>
+    </div>
+
+    <div class="price-box">
+      <div>
+        <div class="pl">Abonnement annuel</div>
+        <div class="pv">{{price}}</div>
+        <div class="pd">{{priceDetail}}</div>
+      </div>
+      <div class="pright">Accès <b>illimité pour tout le personnel</b> — pas de coût par utilisateur. Tarif valable pour {{commune}}.</div>
+    </div>
+
+    <div class="cols">
+      <div class="col">
+        <div class="section-t">Conditions</div>
+        <ul>
+          <li>Durée : 12 mois, renouvelable</li>
+          <li>Mise en service sous 5 jours ouvrables</li>
+          <li>Offre valable jusqu'au {{validUntil}}</li>
+          <li>Prix HTVA — soumis aux conditions générales Vanden Broele</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="section-t">Votre contact</div>
+        <div class="contact-card">
+          <div class="cn">{{rep}}</div>
+          <div class="cr">Conseiller·ère Vanden Broele Connect</div>
+          <div class="ci">✉ {{repEmail}}</div>
+          <div class="ci">☎ {{repPhone}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span><span class="bl">Vanden Broele SA</span> — Rue du Cerf 200, 1332 Genval — 02 308 29 00</span>
+    <span class="baseline">Innover par la connaissance</span>
+  </div>
+
+</div>
+</body>
+</html>
