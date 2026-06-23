@@ -44,7 +44,7 @@ const TENANT = {
      Le dossier doit être partagé avec l'email du prospect (accès restreint).
      ----------------------------------------------------------------------- */
   sharePoint: {
-    base: "https://vandenbroele.sharepoint.com/sites/offres-demo/Documents%20partag%C3%A9s/"
+    base: "https://vandenbroele1.sharepoint.com/sites/Mesfichiers-SUY/Documents%20partag%C3%A9s/offres-demo/"
   },
 
   /* Collections disponibles dans le générateur de liens */
