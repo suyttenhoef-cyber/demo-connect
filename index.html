@@ -346,6 +346,38 @@ footer .wrap{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;text-ali
 .tour-launch{position:fixed;bottom:22px;right:22px;z-index:80;display:flex;align-items:center;gap:9px;background:linear-gradient(120deg,var(--assist1),var(--assist2));color:#fff;font-weight:600;font-size:14px;padding:12px 18px;border-radius:999px;box-shadow:0 10px 26px rgba(109,59,240,.4)}
 .tour-launch:hover{filter:brightness(1.08)}
 @media(max-width:620px){.tour-launch span{display:none}.tour-launch{padding:14px;border-radius:50%}}
+.offer-fab{position:fixed;bottom:22px;right:180px;z-index:80;display:flex;align-items:center;gap:9px;background:#0a558c;color:#fff;font-weight:600;font-size:14px;padding:12px 20px;border-radius:999px;box-shadow:0 8px 22px rgba(10,85,140,.45);text-decoration:none;cursor:pointer;border:none}
+.offer-fab:hover{background:#0c6aaf;transform:translateY(-1px)}
+.offer-fab svg{flex-shrink:0}
+@media(max-width:620px){.offer-fab{right:80px}.offer-fab span{display:none}.offer-fab{padding:14px;border-radius:50%}}
+.offer-ready{border-color:#0a558c!important;background:linear-gradient(135deg,#f0f7ff 0%,#fff 100%)!important}
+.offer-ready h2{color:#0a558c}
+
+/* ---- page admin : générateur de liens ---- */
+.admin-banner{background:linear-gradient(120deg,#0a558c,#1a7fc1);color:#fff;padding:28px 0 24px}
+.admin-banner h1{color:#fff;margin:0 0 6px;font-size:22px}
+.admin-banner p{color:rgba(255,255,255,.82);margin:0;font-size:14.5px}
+.admin-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:32px;max-width:680px;margin:0 auto}
+.admin-steps{display:flex;flex-direction:column;gap:14px;margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+.admin-step{display:flex;gap:14px;align-items:flex-start}
+.admin-step-n{min-width:28px;height:28px;border-radius:50%;background:#0a558c;color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.admin-step strong{display:block;font-size:14px;color:var(--navy);margin-bottom:2px}
+.admin-step span{font-size:13px;color:var(--muted);line-height:1.5}
+.admin-step code{background:#f1f5f9;border-radius:4px;padding:1px 5px;font-size:12px}
+.admin-form{display:flex;flex-direction:column;gap:16px}
+.admin-row{display:flex;flex-direction:column;gap:5px}
+.admin-row label{font-size:13px;font-weight:600;color:var(--navy)}
+.admin-row input,.admin-row select{border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;background:#fff}
+.admin-row input:focus,.admin-row select:focus{border-color:#0a558c}
+.admin-gen-btn{margin-top:6px;align-self:flex-start;padding:11px 28px;font-size:14.5px}
+.admin-result{margin-top:24px;padding-top:24px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:16px}
+.admin-res-row label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px}
+.admin-copy-wrap{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1.5px solid var(--border)}
+.admin-copy-input{flex:1;border:none;padding:10px 13px;font-size:13px;font-family:monospace;color:var(--ink);outline:none;background:#f8fafc;min-width:0}
+.admin-copy-btn{background:#0a558c;color:#fff;border:none;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
+.admin-copy-btn:hover{background:#0c6aaf}
+.admin-note{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:13px 16px;font-size:13px;color:#78350f;display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+.admin-note svg{flex-shrink:0;margin-top:1px}
 
 /* ---- page article — layout sidebar gauche (fidèle à Connect) ---- */
 .art-layout{display:grid;grid-template-columns:72px 260px 1fr;min-height:calc(100vh - 78px);border-top:1px solid var(--border)}
@@ -444,8 +476,277 @@ const TENANT = {
     codeUrlPattern: "offres/{code}.pdf",   // dérive l'URL à partir du code
     documentUrl:    "offres/offre.pdf",    // utilisé si requireCode = false
     codeHint:       "Code reçu par e-mail avec votre proposition (ex. gesves-9f3a2)"
-  }
+  },
+
+  /* --- SharePoint — offres personnalisées -----------------------------------
+     base    : URL du dossier SharePoint contenant les PDFs d'offres.
+     Nomenclature attendue : {COLLECTION}-{CODE_POSTAL}.pdf
+     Ex. : CPAS-5060.pdf  |  DG-1400.pdf  |  FINANCES-4000.pdf
+     Le dossier doit être partagé avec l'email du prospect (accès restreint).
+     ----------------------------------------------------------------------- */
+  sharePoint: {
+    base: "https://vandenbroele.sharepoint.com/sites/offres-demo/Documents%20partag%C3%A9s/"
+  },
+
+  /* Collections disponibles dans le générateur de liens */
+  collections: ["CPAS","DG","FINANCES","RH","TECHNIQUE","URBANISME","JURIDIQUE"]
 };
+
+</script>
+<script>
+/* Liste des communes belges — code postal + nom (francophones + germanophones) */
+const COMMUNES = [
+  // Région bruxelloise
+  {cp:"1000",nom:"Bruxelles"},
+  {cp:"1020",nom:"Laeken"},
+  {cp:"1030",nom:"Schaerbeek"},
+  {cp:"1040",nom:"Etterbeek"},
+  {cp:"1050",nom:"Ixelles"},
+  {cp:"1060",nom:"Saint-Gilles"},
+  {cp:"1070",nom:"Anderlecht"},
+  {cp:"1080",nom:"Molenbeek-Saint-Jean"},
+  {cp:"1081",nom:"Koekelberg"},
+  {cp:"1082",nom:"Berchem-Sainte-Agathe"},
+  {cp:"1083",nom:"Ganshoren"},
+  {cp:"1090",nom:"Jette"},
+  {cp:"1140",nom:"Evere"},
+  {cp:"1150",nom:"Woluwe-Saint-Pierre"},
+  {cp:"1160",nom:"Auderghem"},
+  {cp:"1170",nom:"Watermael-Boitsfort"},
+  {cp:"1180",nom:"Uccle"},
+  {cp:"1190",nom:"Forest"},
+  {cp:"1200",nom:"Woluwe-Saint-Lambert"},
+  {cp:"1210",nom:"Saint-Josse-ten-Noode"},
+  // Brabant wallon
+  {cp:"1300",nom:"Wavre"},
+  {cp:"1310",nom:"La Hulpe"},
+  {cp:"1320",nom:"Beauvechain"},
+  {cp:"1325",nom:"Chaumont-Gistoux"},
+  {cp:"1330",nom:"Rixensart"},
+  {cp:"1340",nom:"Ottignies-Louvain-la-Neuve"},
+  {cp:"1348",nom:"Louvain-la-Neuve"},
+  {cp:"1350",nom:"Orp-Jauche"},
+  {cp:"1360",nom:"Perwez"},
+  {cp:"1370",nom:"Jodoigne"},
+  {cp:"1380",nom:"Lasne"},
+  {cp:"1390",nom:"Grez-Doiceau"},
+  {cp:"1400",nom:"Nivelles"},
+  {cp:"1410",nom:"Waterloo"},
+  {cp:"1420",nom:"Braine-l'Alleud"},
+  {cp:"1430",nom:"Rebecq"},
+  {cp:"1440",nom:"Braine-le-Château"},
+  {cp:"1450",nom:"Chastre"},
+  {cp:"1457",nom:"Walhain"},
+  {cp:"1460",nom:"Ittre"},
+  {cp:"1470",nom:"Genappe"},
+  {cp:"1480",nom:"Tubize"},
+  {cp:"1490",nom:"Court-Saint-Étienne"},
+  {cp:"1495",nom:"Villers-la-Ville"},
+  // Province de Liège
+  {cp:"4000",nom:"Liège"},
+  {cp:"4020",nom:"Liège (Angleur)"},
+  {cp:"4030",nom:"Liège (Grivegnée)"},
+  {cp:"4040",nom:"Herstal"},
+  {cp:"4050",nom:"Chaudfontaine"},
+  {cp:"4100",nom:"Seraing"},
+  {cp:"4120",nom:"Neupré"},
+  {cp:"4130",nom:"Esneux"},
+  {cp:"4140",nom:"Sprimont"},
+  {cp:"4160",nom:"Anthisnes"},
+  {cp:"4170",nom:"Comblain-au-Pont"},
+  {cp:"4180",nom:"Hamoir"},
+  {cp:"4190",nom:"Ferrières"},
+  {cp:"4210",nom:"Burdinne"},
+  {cp:"4217",nom:"Héron"},
+  {cp:"4219",nom:"Wasseiges"},
+  {cp:"4220",nom:"Wanze"},
+  {cp:"4250",nom:"Geer"},
+  {cp:"4260",nom:"Braives"},
+  {cp:"4280",nom:"Hannut"},
+  {cp:"4300",nom:"Waremme"},
+  {cp:"4340",nom:"Awans"},
+  {cp:"4350",nom:"Remicourt"},
+  {cp:"4360",nom:"Oreye"},
+  {cp:"4400",nom:"Flémalle"},
+  {cp:"4420",nom:"Saint-Nicolas"},
+  {cp:"4430",nom:"Ans"},
+  {cp:"4450",nom:"Juprelle"},
+  {cp:"4460",nom:"Grâce-Hollogne"},
+  {cp:"4470",nom:"Saint-Georges-sur-Meuse"},
+  {cp:"4480",nom:"Engis"},
+  {cp:"4500",nom:"Huy"},
+  {cp:"4530",nom:"Villers-le-Bouillet"},
+  {cp:"4537",nom:"Verlaine"},
+  {cp:"4540",nom:"Amay"},
+  {cp:"4550",nom:"Nandrin"},
+  {cp:"4557",nom:"Tinlot"},
+  {cp:"4560",nom:"Clavier"},
+  {cp:"4570",nom:"Marchin"},
+  {cp:"4577",nom:"Modave"},
+  {cp:"4590",nom:"Ouffet"},
+  {cp:"4600",nom:"Visé"},
+  {cp:"4610",nom:"Beyne-Heusay"},
+  {cp:"4630",nom:"Soumagne"},
+  {cp:"4650",nom:"Herve"},
+  {cp:"4670",nom:"Blégny"},
+  {cp:"4680",nom:"Oupeye"},
+  {cp:"4690",nom:"Bassenge"},
+  // Communauté germanophone
+  {cp:"4700",nom:"Eupen"},
+  {cp:"4710",nom:"Lontzen"},
+  {cp:"4720",nom:"La Calamine"},
+  {cp:"4730",nom:"Raeren"},
+  {cp:"4750",nom:"Butgenbach"},
+  {cp:"4760",nom:"Büllingen"},
+  {cp:"4770",nom:"Amel"},
+  {cp:"4780",nom:"Saint-Vith"},
+  {cp:"4790",nom:"Burg-Reuland"},
+  {cp:"4800",nom:"Lierneux"},
+  {cp:"4830",nom:"Limbourg"},
+  {cp:"4837",nom:"Baelen"},
+  {cp:"4840",nom:"Welkenraedt"},
+  {cp:"4845",nom:"Jalhay"},
+  {cp:"4850",nom:"Plombières"},
+  {cp:"4860",nom:"Pepinster"},
+  {cp:"4877",nom:"Olne"},
+  {cp:"4880",nom:"Aubel"},
+  {cp:"4890",nom:"Thimister-Clermont"},
+  {cp:"4900",nom:"Spa"},
+  {cp:"4910",nom:"Theux"},
+  {cp:"4920",nom:"Aywaille"},
+  {cp:"4950",nom:"Waimes"},
+  {cp:"4960",nom:"Malmedy"},
+  {cp:"4970",nom:"Stavelot"},
+  {cp:"4980",nom:"Trois-Ponts"},
+  {cp:"4987",nom:"Stoumont"},
+  {cp:"4990",nom:"Lierneux"},
+  // Province de Namur
+  {cp:"5000",nom:"Namur"},
+  {cp:"5020",nom:"Malonne"},
+  {cp:"5030",nom:"Gembloux"},
+  {cp:"5060",nom:"Sambreville"},
+  {cp:"5070",nom:"Fosses-la-Ville"},
+  {cp:"5080",nom:"La Bruyère"},
+  {cp:"5100",nom:"Namur (Dave)"},
+  {cp:"5140",nom:"Sombreffe"},
+  {cp:"5150",nom:"Floreffe"},
+  {cp:"5170",nom:"Profondeville"},
+  {cp:"5190",nom:"Jemeppe-sur-Sambre"},
+  {cp:"5300",nom:"Andenne"},
+  {cp:"5310",nom:"Eghezée"},
+  {cp:"5330",nom:"Assesse"},
+  {cp:"5340",nom:"Gesves"},
+  {cp:"5350",nom:"Ohey"},
+  {cp:"5360",nom:"Hamois"},
+  {cp:"5370",nom:"Havelange"},
+  {cp:"5377",nom:"Somme-Leuze"},
+  {cp:"5380",nom:"Fernelmont"},
+  // Province de Luxembourg
+  {cp:"6600",nom:"Bastogne"},
+  {cp:"6630",nom:"Martelange"},
+  {cp:"6637",nom:"Fauvillers"},
+  {cp:"6640",nom:"Vaux-sur-Sûre"},
+  {cp:"6660",nom:"Houffalize"},
+  {cp:"6670",nom:"Gouvy"},
+  {cp:"6680",nom:"Sainte-Ode"},
+  {cp:"6690",nom:"Vielsalm"},
+  {cp:"6700",nom:"Arlon"},
+  {cp:"6720",nom:"Habay"},
+  {cp:"6730",nom:"Tintigny"},
+  {cp:"6740",nom:"Etalle"},
+  {cp:"6750",nom:"Musson"},
+  {cp:"6760",nom:"Virton"},
+  {cp:"6780",nom:"Messancy"},
+  {cp:"6790",nom:"Aubange"},
+  {cp:"6800",nom:"Libramont-Chevigny"},
+  {cp:"6810",nom:"Chiny"},
+  {cp:"6820",nom:"Florenville"},
+  {cp:"6830",nom:"Bouillon"},
+  {cp:"6840",nom:"Neufchâteau"},
+  {cp:"6850",nom:"Paliseul"},
+  {cp:"6860",nom:"Léglise"},
+  {cp:"6870",nom:"Saint-Hubert"},
+  {cp:"6880",nom:"Bertrix"},
+  {cp:"6890",nom:"Libin"},
+  {cp:"6900",nom:"Marche-en-Famenne"},
+  {cp:"6920",nom:"Wellin"},
+  {cp:"6940",nom:"Durbuy"},
+  {cp:"6950",nom:"Nassogne"},
+  {cp:"6960",nom:"Manhay"},
+  {cp:"6970",nom:"Tenneville"},
+  {cp:"6980",nom:"La Roche-en-Ardenne"},
+  {cp:"6990",nom:"Hotton"},
+  {cp:"6997",nom:"Érezée"},
+  // Province de Hainaut
+  {cp:"6000",nom:"Charleroi"},
+  {cp:"6001",nom:"Marcinelle"},
+  {cp:"6010",nom:"Couillet"},
+  {cp:"6040",nom:"Jumet"},
+  {cp:"6041",nom:"Gosselies"},
+  {cp:"6060",nom:"Gilly"},
+  {cp:"6110",nom:"Montigny-le-Tilleul"},
+  {cp:"6120",nom:"Ham-sur-Heure-Nalinnes"},
+  {cp:"6140",nom:"Fontaine-l'Évêque"},
+  {cp:"6150",nom:"Anderlues"},
+  {cp:"6180",nom:"Courcelles"},
+  {cp:"6200",nom:"Châtelet"},
+  {cp:"6210",nom:"Frasnes-lez-Gosselies"},
+  {cp:"6220",nom:"Fleurus"},
+  {cp:"6230",nom:"Pont-à-Celles"},
+  {cp:"6240",nom:"Farciennes"},
+  {cp:"6250",nom:"Aiseau-Presles"},
+  {cp:"6280",nom:"Gerpinnes"},
+  {cp:"6440",nom:"Froidchapelle"},
+  {cp:"6460",nom:"Chimay"},
+  {cp:"6470",nom:"Sivry-Rance"},
+  {cp:"6500",nom:"Beaumont"},
+  {cp:"6530",nom:"Thuin"},
+  {cp:"6560",nom:"Erquelinnes"},
+  {cp:"6590",nom:"Momignies"},
+  {cp:"7000",nom:"Mons"},
+  {cp:"7011",nom:"Ghlin"},
+  {cp:"7050",nom:"Jurbise"},
+  {cp:"7060",nom:"Soignies"},
+  {cp:"7070",nom:"Le Rœulx"},
+  {cp:"7090",nom:"Braine-le-Comte"},
+  {cp:"7100",nom:"La Louvière"},
+  {cp:"7120",nom:"Estinnes"},
+  {cp:"7130",nom:"Binche"},
+  {cp:"7140",nom:"Morlanwelz"},
+  {cp:"7160",nom:"Chapelle-lez-Herlaimont"},
+  {cp:"7170",nom:"La Hestre"},
+  {cp:"7180",nom:"Seneffe"},
+  {cp:"7190",nom:"Écaussinnes"},
+  {cp:"7500",nom:"Tournai"},
+  {cp:"7520",nom:"Ramegnies-Chin"},
+  {cp:"7530",nom:"Gaurain-Ramecroix"},
+  {cp:"7600",nom:"Péruwelz"},
+  {cp:"7610",nom:"Rumes"},
+  {cp:"7700",nom:"Mouscron"},
+  {cp:"7711",nom:"Dottignies"},
+  {cp:"7730",nom:"Estaimpuis"},
+  {cp:"7740",nom:"Pecq"},
+  {cp:"7750",nom:"Mont-de-l'Enclus"},
+  {cp:"7760",nom:"Celles"},
+  {cp:"7780",nom:"Comines-Warneton"},
+  {cp:"7800",nom:"Ath"},
+  {cp:"7810",nom:"Maffle"},
+  {cp:"7820",nom:"Enghien"},
+  {cp:"7830",nom:"Silly"},
+  {cp:"7850",nom:"Enghien (Marcq)"},
+  {cp:"7860",nom:"Lessines"},
+  {cp:"7870",nom:"Lens"},
+  {cp:"7880",nom:"Flobecq"},
+  {cp:"7890",nom:"Ellezelles"},
+  {cp:"7900",nom:"Péruwelz (Leuze)"},
+  {cp:"7910",nom:"Leuze-en-Hainaut"},
+  {cp:"7911",nom:"Frasnes-lez-Anvaing"},
+  {cp:"7912",nom:"Pipaix"},
+  {cp:"7940",nom:"Brugelette"},
+  {cp:"7950",nom:"Chièvres"},
+  {cp:"7970",nom:"Beloeil"},
+  {cp:"7971",nom:"Basècles"},
+];
 
 </script>
 <script>
@@ -772,6 +1073,21 @@ const I = {
 /* Logo : chemin local pour le dev (Live Server). build.py le remplace par un data URI base64. */
 const LOGO_URL="data:image/png;base64,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";
 const CUBE='<img class="cube" src="'+LOGO_URL+'" alt="Vanden Broele Connect">';
+
+/* Offre personnalisée : ?c=CODE_POSTAL&col=COLLECTION construit l'URL SharePoint automatiquement */
+const OFFER_PARAMS=(()=>{
+  try{
+    const p=new URLSearchParams(window.location.search);
+    const c=p.get('c');
+    if(!c)return null;
+    const col=(p.get('col')||'CPAS').toUpperCase();
+    const commune=(typeof COMMUNES!=='undefined'?COMMUNES:[]).find(x=>x.cp===c);
+    const url=(TENANT.sharePoint||{}).base
+      ?TENANT.sharePoint.base+col+'-'+c+'.pdf'
+      :null;
+    return{cp:c,col,commune:commune||{cp:c,nom:c},url,fileName:col+'-'+c+'.pdf'};
+  }catch(e){return null;}
+})();
 
 const norm=s=>(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 const byId=id=>CONTENT.find(c=>c.id===id);
@@ -1164,16 +1480,32 @@ function viewArticle(id){
 }
 
 /* ---- éléments partagés ---- */
-function offer(){return `<div class="offer">
+function offer(){
+  const op=OFFER_PARAMS;
+  if(op){
+    const nomCommune=op.commune?op.commune.nom:op.cp;
+    return `<div class="offer offer-ready">
+    <div>
+      <h2>Votre offre personnalisée est prête</h2>
+      <p>Document préparé spécialement pour <strong>${nomCommune}</strong>. Cliquez ci-dessous pour le télécharger via SharePoint.</p>
+    </div>
+    <div class="oc">
+      <button class="btn btn-w" onclick="downloadOffer()">⬇ Télécharger mon offre</button>
+      <button class="btn btn-o" onclick="ext()">Demander une démo</button>
+    </div></div>`;
+  }
+  return `<div class="offer">
   <div><h2>${TENANT.offer.title}</h2><p>${TENANT.offer.pitch}</p><div class="price">${TENANT.offer.price}</div></div>
   <div class="oc">
     <button class="btn btn-w" onclick="downloadOffer()">Télécharger mon offre</button>
     <button class="btn btn-o" onclick="ext()">Demander une démo</button>
-  </div></div>`;}
+  </div></div>`;
+}
 function ext(){window.open(TENANT.contactUrl,'_blank');}
 
 /* ---- Téléchargement de l'offre personnalisée ---- */
 function downloadOffer(){
+  if(OFFER_PARAMS&&OFFER_PARAMS.url){window.open(OFFER_PARAMS.url,'_blank');return;}
   const o=TENANT.offer;
   if(!o.requireCode){window.open(o.documentUrl,'_blank');return;}
   openOfferModal();
@@ -1308,18 +1640,111 @@ function shell(content){
     <span>Vie privée</span><span>–</span><span>IA Disclaimer</span><span>–</span><span>Déclaration d'accessibilité</span>
     <span style="width:100%;margin-top:8px;color:#9aa6b2">Démonstration · contenus simulés · ${TENANT.commune} — « Innover par la connaissance »</span>
   </div></footer>
-  <button class="tour-launch" onclick="startTour()" title="Visite guidée de la démo">${I.assist}<span>Visite guidée</span></button>`;
+  <button class="tour-launch" onclick="startTour()" title="Visite guidée de la démo">${I.assist}<span>Visite guidée</span></button>
+  ${OFFER_PARAMS?`<button class="offer-fab" onclick="downloadOffer()">${I.doc}<span>Mon offre</span></button>`:""}` ;
 }
 function toggleContenu(e){e.stopPropagation();const d=document.getElementById("contenuDD");if(d)d.style.display=d.style.display==="none"?"block":"none";}
 document.addEventListener("click",()=>{const d=document.getElementById("contenuDD");if(d)d.style.display="none";});
 
 function go(p){location.hash="#/"+p;window.scrollTo(0,0);}
 function runSearch(q){if(q&&q.trim()){SF_TYPE="Tous";go("chercher?q="+encodeURIComponent(q.trim()));}else{go("chercher");}}
+
+/* ---- PAGE ADMIN : générateur de liens démo ---- */
+function viewAdmin(){
+  const cols=(TENANT.collections||["CPAS","DG","FINANCES","RH","TECHNIQUE","URBANISME"]);
+  const baseDemo=location.origin+location.pathname;
+  return `<div class="admin-page">
+  <div class="admin-banner">
+    <div class="wrap"><h1>Générateur de lien démo</h1>
+    <p>Remplissez les champs et générez le lien à envoyer au prospect. Aucune modification de code requise.</p></div>
+  </div>
+  <div class="wrap pad">
+    <div class="admin-card">
+      <div class="admin-steps">
+        <div class="admin-step"><span class="admin-step-n">1</span><div>
+          <strong>Préparez le PDF</strong>
+          <span>Nommez-le selon la nomenclature générée ci-dessous et déposez-le dans le dossier SharePoint <code>offres-demo/</code>.</span>
+        </div></div>
+        <div class="admin-step"><span class="admin-step-n">2</span><div>
+          <strong>Donnez l'accès SharePoint</strong>
+          <span>Partagez le fichier avec l'adresse e-mail du prospect (accès restreint).</span>
+        </div></div>
+        <div class="admin-step"><span class="admin-step-n">3</span><div>
+          <strong>Envoyez le lien démo</strong>
+          <span>Copiez le lien généré ci-dessous et transmettez-le au prospect.</span>
+        </div></div>
+      </div>
+
+      <div class="admin-form">
+        <div class="admin-row">
+          <label for="adminCp">Commune / Code postal</label>
+          <input id="adminCp" list="adminCpList" placeholder="Ex. : 5060 ou Sambreville"
+            oninput="adminPreview()" autocomplete="off">
+          <datalist id="adminCpList">
+            ${(typeof COMMUNES!=='undefined'?COMMUNES:[]).map(c=>`<option value="${c.cp}">${c.cp} — ${c.nom}</option>`).join("")}
+          </datalist>
+        </div>
+        <div class="admin-row">
+          <label for="adminCol">Collection</label>
+          <select id="adminCol" onchange="adminPreview()">
+            ${cols.map(c=>`<option value="${c}"${c==="CPAS"?" selected":""}>${c}</option>`).join("")}
+          </select>
+        </div>
+        <button class="btn btn-b admin-gen-btn" onclick="adminGenerate()">Générer le lien</button>
+      </div>
+
+      <div id="adminResult" class="admin-result" style="display:none">
+        <div class="admin-res-row">
+          <label>Nom du fichier à déposer dans SharePoint</label>
+          <div class="admin-copy-wrap">
+            <input id="adminFileName" class="admin-copy-input" readonly>
+            <button class="admin-copy-btn" onclick="adminCopy('adminFileName',this)">Copier</button>
+          </div>
+        </div>
+        <div class="admin-res-row">
+          <label>Lien démo à envoyer au prospect</label>
+          <div class="admin-copy-wrap">
+            <input id="adminDemoUrl" class="admin-copy-input" readonly>
+            <button class="admin-copy-btn" onclick="adminCopy('adminDemoUrl',this)">Copier</button>
+          </div>
+        </div>
+        <div class="admin-note">
+          ${I.bulb} Conseil : envoyez l'invitation SharePoint <em>avant</em> le lien démo, afin que le prospect ait déjà accès au document quand il clique sur « Mon offre ».
+        </div>
+      </div>
+    </div>
+  </div></div>`;
+}
+
+function adminGenerate(){
+  const raw=(document.getElementById('adminCp')||{}).value||"";
+  const col=(document.getElementById('adminCol')||{}).value||"CPAS";
+  const cpNum=raw.replace(/\D/g,"").slice(0,4);
+  if(!cpNum){alert('Veuillez saisir un code postal à 4 chiffres.');return;}
+  const commune=(typeof COMMUNES!=='undefined'?COMMUNES:[]).find(c=>c.cp===cpNum);
+  const fileName=col+'-'+cpNum+'.pdf';
+  const demoUrl=location.origin+location.pathname+'?c='+cpNum+'&col='+encodeURIComponent(col);
+  document.getElementById('adminFileName').value=fileName;
+  document.getElementById('adminDemoUrl').value=demoUrl;
+  document.getElementById('adminResult').style.display='block';
+  if(commune)document.getElementById('adminCp').value=cpNum+' — '+commune.nom;
+}
+
+function adminCopy(id,btn){
+  const el=document.getElementById(id);if(!el)return;
+  el.select();
+  navigator.clipboard.writeText(el.value).then(()=>{
+    const orig=btn.textContent;btn.textContent='✓ Copié';btn.style.background='#1f7a4d';
+    setTimeout(()=>{btn.textContent=orig;btn.style.background='';},2000);
+  }).catch(()=>{document.execCommand('copy');});
+}
+
 function render(){
   const h=(location.hash.replace("#/","")||"");
   const [path,query]=h.split("?");
   let c;
   if(path===""||path==="accueil")c=viewHome();
+  else if(path==="admin")c=viewAdmin();
   else if(path==="rubriques")c=viewRubriques();
   else if(path.startsWith("rubrique/"))c=viewRubrique(path.split("/")[1]);
   else if(path.startsWith("biblioth"))c=viewBiblio();

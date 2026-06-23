@@ -35,5 +35,18 @@ const TENANT = {
     codeUrlPattern: "offres/{code}.pdf",   // dérive l'URL à partir du code
     documentUrl:    "offres/offre.pdf",    // utilisé si requireCode = false
     codeHint:       "Code reçu par e-mail avec votre proposition (ex. gesves-9f3a2)"
-  }
+  },
+
+  /* --- SharePoint — offres personnalisées -----------------------------------
+     base    : URL du dossier SharePoint contenant les PDFs d'offres.
+     Nomenclature attendue : {COLLECTION}-{CODE_POSTAL}.pdf
+     Ex. : CPAS-5060.pdf  |  DG-1400.pdf  |  FINANCES-4000.pdf
+     Le dossier doit être partagé avec l'email du prospect (accès restreint).
+     ----------------------------------------------------------------------- */
+  sharePoint: {
+    base: "https://vandenbroele.sharepoint.com/sites/offres-demo/Documents%20partag%C3%A9s/"
+  },
+
+  /* Collections disponibles dans le générateur de liens */
+  collections: ["CPAS","DG","FINANCES","RH","TECHNIQUE","URBANISME","JURIDIQUE"]
 };

@@ -39,6 +39,21 @@ const I = {
 const LOGO_URL="Image/logo_demo.png";
 const CUBE='<img class="cube" src="'+LOGO_URL+'" alt="Vanden Broele Connect">';
 
+/* Offre personnalisée : ?c=CODE_POSTAL&col=COLLECTION construit l'URL SharePoint automatiquement */
+const OFFER_PARAMS=(()=>{
+  try{
+    const p=new URLSearchParams(window.location.search);
+    const c=p.get('c');
+    if(!c)return null;
+    const col=(p.get('col')||'CPAS').toUpperCase();
+    const commune=(typeof COMMUNES!=='undefined'?COMMUNES:[]).find(x=>x.cp===c);
+    const url=(TENANT.sharePoint||{}).base
+      ?TENANT.sharePoint.base+col+'-'+c+'.pdf'
+      :null;
+    return{cp:c,col,commune:commune||{cp:c,nom:c},url,fileName:col+'-'+c+'.pdf'};
+  }catch(e){return null;}
+})();
+
 const norm=s=>(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 const byId=id=>CONTENT.find(c=>c.id===id);
 const rubName=id=>(RUBRIQUES.find(r=>r.id===id)||{}).name||"";
@@ -430,16 +445,32 @@ function viewArticle(id){
 }
 
 /* ---- éléments partagés ---- */
-function offer(){return `<div class="offer">
+function offer(){
+  const op=OFFER_PARAMS;
+  if(op){
+    const nomCommune=op.commune?op.commune.nom:op.cp;
+    return `<div class="offer offer-ready">
+    <div>
+      <h2>Votre offre personnalisée est prête</h2>
+      <p>Document préparé spécialement pour <strong>${nomCommune}</strong>. Cliquez ci-dessous pour le télécharger via SharePoint.</p>
+    </div>
+    <div class="oc">
+      <button class="btn btn-w" onclick="downloadOffer()">⬇ Télécharger mon offre</button>
+      <button class="btn btn-o" onclick="ext()">Demander une démo</button>
+    </div></div>`;
+  }
+  return `<div class="offer">
   <div><h2>${TENANT.offer.title}</h2><p>${TENANT.offer.pitch}</p><div class="price">${TENANT.offer.price}</div></div>
   <div class="oc">
     <button class="btn btn-w" onclick="downloadOffer()">Télécharger mon offre</button>
     <button class="btn btn-o" onclick="ext()">Demander une démo</button>
-  </div></div>`;}
+  </div></div>`;
+}
 function ext(){window.open(TENANT.contactUrl,'_blank');}
 
 /* ---- Téléchargement de l'offre personnalisée ---- */
 function downloadOffer(){
+  if(OFFER_PARAMS&&OFFER_PARAMS.url){window.open(OFFER_PARAMS.url,'_blank');return;}
   const o=TENANT.offer;
   if(!o.requireCode){window.open(o.documentUrl,'_blank');return;}
   openOfferModal();
@@ -574,18 +605,111 @@ function shell(content){
     <span>Vie privée</span><span>–</span><span>IA Disclaimer</span><span>–</span><span>Déclaration d'accessibilité</span>
     <span style="width:100%;margin-top:8px;color:#9aa6b2">Démonstration · contenus simulés · ${TENANT.commune} — « Innover par la connaissance »</span>
   </div></footer>
-  <button class="tour-launch" onclick="startTour()" title="Visite guidée de la démo">${I.assist}<span>Visite guidée</span></button>`;
+  <button class="tour-launch" onclick="startTour()" title="Visite guidée de la démo">${I.assist}<span>Visite guidée</span></button>
+  ${OFFER_PARAMS?`<button class="offer-fab" onclick="downloadOffer()">${I.doc}<span>Mon offre</span></button>`:""}` ;
 }
 function toggleContenu(e){e.stopPropagation();const d=document.getElementById("contenuDD");if(d)d.style.display=d.style.display==="none"?"block":"none";}
 document.addEventListener("click",()=>{const d=document.getElementById("contenuDD");if(d)d.style.display="none";});
 
 function go(p){location.hash="#/"+p;window.scrollTo(0,0);}
 function runSearch(q){if(q&&q.trim()){SF_TYPE="Tous";go("chercher?q="+encodeURIComponent(q.trim()));}else{go("chercher");}}
+
+/* ---- PAGE ADMIN : générateur de liens démo ---- */
+function viewAdmin(){
+  const cols=(TENANT.collections||["CPAS","DG","FINANCES","RH","TECHNIQUE","URBANISME"]);
+  const baseDemo=location.origin+location.pathname;
+  return `<div class="admin-page">
+  <div class="admin-banner">
+    <div class="wrap"><h1>Générateur de lien démo</h1>
+    <p>Remplissez les champs et générez le lien à envoyer au prospect. Aucune modification de code requise.</p></div>
+  </div>
+  <div class="wrap pad">
+    <div class="admin-card">
+      <div class="admin-steps">
+        <div class="admin-step"><span class="admin-step-n">1</span><div>
+          <strong>Préparez le PDF</strong>
+          <span>Nommez-le selon la nomenclature générée ci-dessous et déposez-le dans le dossier SharePoint <code>offres-demo/</code>.</span>
+        </div></div>
+        <div class="admin-step"><span class="admin-step-n">2</span><div>
+          <strong>Donnez l'accès SharePoint</strong>
+          <span>Partagez le fichier avec l'adresse e-mail du prospect (accès restreint).</span>
+        </div></div>
+        <div class="admin-step"><span class="admin-step-n">3</span><div>
+          <strong>Envoyez le lien démo</strong>
+          <span>Copiez le lien généré ci-dessous et transmettez-le au prospect.</span>
+        </div></div>
+      </div>
+
+      <div class="admin-form">
+        <div class="admin-row">
+          <label for="adminCp">Commune / Code postal</label>
+          <input id="adminCp" list="adminCpList" placeholder="Ex. : 5060 ou Sambreville"
+            oninput="adminPreview()" autocomplete="off">
+          <datalist id="adminCpList">
+            ${(typeof COMMUNES!=='undefined'?COMMUNES:[]).map(c=>`<option value="${c.cp}">${c.cp} — ${c.nom}</option>`).join("")}
+          </datalist>
+        </div>
+        <div class="admin-row">
+          <label for="adminCol">Collection</label>
+          <select id="adminCol" onchange="adminPreview()">
+            ${cols.map(c=>`<option value="${c}"${c==="CPAS"?" selected":""}>${c}</option>`).join("")}
+          </select>
+        </div>
+        <button class="btn btn-b admin-gen-btn" onclick="adminGenerate()">Générer le lien</button>
+      </div>
+
+      <div id="adminResult" class="admin-result" style="display:none">
+        <div class="admin-res-row">
+          <label>Nom du fichier à déposer dans SharePoint</label>
+          <div class="admin-copy-wrap">
+            <input id="adminFileName" class="admin-copy-input" readonly>
+            <button class="admin-copy-btn" onclick="adminCopy('adminFileName',this)">Copier</button>
+          </div>
+        </div>
+        <div class="admin-res-row">
+          <label>Lien démo à envoyer au prospect</label>
+          <div class="admin-copy-wrap">
+            <input id="adminDemoUrl" class="admin-copy-input" readonly>
+            <button class="admin-copy-btn" onclick="adminCopy('adminDemoUrl',this)">Copier</button>
+          </div>
+        </div>
+        <div class="admin-note">
+          ${I.bulb} Conseil : envoyez l'invitation SharePoint <em>avant</em> le lien démo, afin que le prospect ait déjà accès au document quand il clique sur « Mon offre ».
+        </div>
+      </div>
+    </div>
+  </div></div>`;
+}
+
+function adminGenerate(){
+  const raw=(document.getElementById('adminCp')||{}).value||"";
+  const col=(document.getElementById('adminCol')||{}).value||"CPAS";
+  const cpNum=raw.replace(/\D/g,"").slice(0,4);
+  if(!cpNum){alert('Veuillez saisir un code postal à 4 chiffres.');return;}
+  const commune=(typeof COMMUNES!=='undefined'?COMMUNES:[]).find(c=>c.cp===cpNum);
+  const fileName=col+'-'+cpNum+'.pdf';
+  const demoUrl=location.origin+location.pathname+'?c='+cpNum+'&col='+encodeURIComponent(col);
+  document.getElementById('adminFileName').value=fileName;
+  document.getElementById('adminDemoUrl').value=demoUrl;
+  document.getElementById('adminResult').style.display='block';
+  if(commune)document.getElementById('adminCp').value=cpNum+' — '+commune.nom;
+}
+
+function adminCopy(id,btn){
+  const el=document.getElementById(id);if(!el)return;
+  el.select();
+  navigator.clipboard.writeText(el.value).then(()=>{
+    const orig=btn.textContent;btn.textContent='✓ Copié';btn.style.background='#1f7a4d';
+    setTimeout(()=>{btn.textContent=orig;btn.style.background='';},2000);
+  }).catch(()=>{document.execCommand('copy');});
+}
+
 function render(){
   const h=(location.hash.replace("#/","")||"");
   const [path,query]=h.split("?");
   let c;
   if(path===""||path==="accueil")c=viewHome();
+  else if(path==="admin")c=viewAdmin();
   else if(path==="rubriques")c=viewRubriques();
   else if(path.startsWith("rubrique/"))c=viewRubrique(path.split("/")[1]);
   else if(path.startsWith("biblioth"))c=viewBiblio();
