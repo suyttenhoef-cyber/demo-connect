@@ -92,7 +92,7 @@ nav.top a svg{opacity:.8}
 .c-search-inner:focus-within{border-color:var(--blue)}
 .c-search-icon{color:#7c8896;flex-shrink:0;display:flex;align-items:center}
 .c-search-field{flex:1;border:none;outline:none;font-size:15px;padding:13px 0;color:var(--ink);background:none}
-.c-search-btn{background:#1a2d45;color:#fff;font-weight:600;font-size:14px;padding:0 28px;border-radius:0 8px 8px 0;white-space:nowrap;border:none;cursor:pointer}
+.c-search-btn{background:#0a558c;color:#fff;font-weight:600;font-size:14px;padding:0 28px;border-radius:0 8px 8px 0;white-space:nowrap;border:none;cursor:pointer}
 .c-search-btn:hover{background:#243d5d}
 .filters{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 .filter-btn{background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13.5px;color:#3a4654;font-weight:500;display:flex;align-items:center;gap:8px}
