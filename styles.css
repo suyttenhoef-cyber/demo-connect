@@ -362,6 +362,8 @@ footer .wrap{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;text-ali
 .admin-row label{font-size:13px;font-weight:600;color:var(--navy)}
 .admin-row input,.admin-row select{border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;background:#fff}
 .admin-row input:focus,.admin-row select:focus{border-color:#0a558c}
+.admin-row2{display:grid;grid-template-columns:1fr 160px;gap:12px}
+.admin-label-hint{font-weight:400;color:var(--muted);font-size:12px}
 .admin-gen-btn{margin-top:6px;align-self:flex-start;padding:11px 28px;font-size:14.5px}
 .admin-result{margin-top:24px;padding-top:24px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:16px}
 .admin-res-row label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px}

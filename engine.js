@@ -39,18 +39,23 @@ const I = {
 const LOGO_URL="Image/logo_demo.png";
 const CUBE='<img class="cube" src="'+LOGO_URL+'" alt="Vanden Broele Connect">';
 
-/* Offre personnalisée : ?c=CODE_POSTAL&col=COLLECTION construit l'URL SharePoint automatiquement */
+/* Offre personnalisée :
+   ?c=CODE_POSTAL&col=COLLECTION&offer=BASE64(url_sharepoint_public)
+   Le paramètre offer= (base64 du lien SharePoint "Toute personne") est généré
+   par la page #/admin — le commercial colle son lien, copie le résultat. */
 const OFFER_PARAMS=(()=>{
   try{
     const p=new URLSearchParams(window.location.search);
     const c=p.get('c');
-    if(!c)return null;
+    const offerB64=p.get('offer');
+    if(!c&&!offerB64)return null;
     const col=(p.get('col')||'CPAS').toUpperCase();
-    const commune=(typeof COMMUNES!=='undefined'?COMMUNES:[]).find(x=>x.cp===c);
-    const url=(TENANT.sharePoint||{}).base
-      ?TENANT.sharePoint.base+col+'-'+c+'.pdf'
-      :null;
-    return{cp:c,col,commune:commune||{cp:c,nom:c},url,fileName:col+'-'+c+'.pdf'};
+    const commune=(typeof COMMUNES!=='undefined'?COMMUNES:[]).find(x=>x.cp===(c||''));
+    let url=null;
+    if(offerB64){try{url=atob(offerB64);}catch(e){url=null;}}
+    if(!url&&c&&(TENANT.sharePoint||{}).base)url=TENANT.sharePoint.base+col+'-'+c+'.pdf';
+    if(!url)return null;
+    return{cp:c,col,commune:commune||{cp:c||'',nom:c||''},url,fileName:col+'-'+(c||'')+'.pdf'};
   }catch(e){return null;}
 })();
 
@@ -617,45 +622,50 @@ function runSearch(q){if(q&&q.trim()){SF_TYPE="Tous";go("chercher?q="+encodeURIC
 /* ---- PAGE ADMIN : générateur de liens démo ---- */
 function viewAdmin(){
   const cols=(TENANT.collections||["CPAS","DG","FINANCES","RH","TECHNIQUE","URBANISME"]);
-  const baseDemo=location.origin+location.pathname;
   return `<div class="admin-page">
   <div class="admin-banner">
     <div class="wrap"><h1>Générateur de lien démo</h1>
-    <p>Remplissez les champs et générez le lien à envoyer au prospect. Aucune modification de code requise.</p></div>
+    <p>Remplissez les champs, collez le lien SharePoint du fichier, et copiez le lien à envoyer au prospect.</p></div>
   </div>
   <div class="wrap pad">
     <div class="admin-card">
+
       <div class="admin-steps">
         <div class="admin-step"><span class="admin-step-n">1</span><div>
-          <strong>Préparez le PDF</strong>
-          <span>Nommez-le selon la nomenclature générée ci-dessous et déposez-le dans le dossier SharePoint <code>offres-demo/</code>.</span>
+          <strong>Préparez et déposez le PDF</strong>
+          <span>Nommez-le selon la nomenclature et déposez-le dans le dossier SharePoint <code>offres-demo/</code>.</span>
         </div></div>
         <div class="admin-step"><span class="admin-step-n">2</span><div>
-          <strong>Donnez l'accès SharePoint</strong>
-          <span>Partagez le fichier avec l'adresse e-mail du prospect (accès restreint).</span>
+          <strong>Créez un lien de partage SharePoint</strong>
+          <span>Clic droit sur le fichier → <em>Partager</em> → <em>Toute personne disposant du lien peut afficher</em> → Copier le lien.</span>
         </div></div>
         <div class="admin-step"><span class="admin-step-n">3</span><div>
-          <strong>Envoyez le lien démo</strong>
-          <span>Copiez le lien généré ci-dessous et transmettez-le au prospect.</span>
+          <strong>Générez et envoyez le lien démo</strong>
+          <span>Collez le lien SharePoint ci-dessous, cliquez sur Générer, puis transmettez le lien démo au prospect.</span>
         </div></div>
       </div>
 
       <div class="admin-form">
-        <div class="admin-row">
-          <label for="adminCp">Commune / Code postal</label>
-          <input id="adminCp" list="adminCpList" placeholder="Ex. : 5060 ou Sambreville"
-            oninput="adminPreview()" autocomplete="off">
-          <datalist id="adminCpList">
-            ${(typeof COMMUNES!=='undefined'?COMMUNES:[]).map(c=>`<option value="${c.cp}">${c.cp} — ${c.nom}</option>`).join("")}
-          </datalist>
+        <div class="admin-row2">
+          <div class="admin-row">
+            <label for="adminCp">Commune / Code postal</label>
+            <input id="adminCp" list="adminCpList" placeholder="Ex. : 5060 ou Sambreville" autocomplete="off">
+            <datalist id="adminCpList">
+              ${(typeof COMMUNES!=='undefined'?COMMUNES:[]).map(c=>`<option value="${c.cp}">${c.cp} — ${c.nom}</option>`).join("")}
+            </datalist>
+          </div>
+          <div class="admin-row">
+            <label for="adminCol">Collection</label>
+            <select id="adminCol">
+              ${cols.map(c=>`<option value="${c}"${c==="CPAS"?" selected":""}>${c}</option>`).join("")}
+            </select>
+          </div>
         </div>
         <div class="admin-row">
-          <label for="adminCol">Collection</label>
-          <select id="adminCol" onchange="adminPreview()">
-            ${cols.map(c=>`<option value="${c}"${c==="CPAS"?" selected":""}>${c}</option>`).join("")}
-          </select>
+          <label for="adminSpUrl">Lien SharePoint du fichier <span class="admin-label-hint">(lien "Toute personne disposant du lien")</span></label>
+          <input id="adminSpUrl" placeholder="https://vandenbroele1.sharepoint.com/:b:/s/...?e=...">
         </div>
-        <button class="btn btn-b admin-gen-btn" onclick="adminGenerate()">Générer le lien</button>
+        <button class="btn btn-b admin-gen-btn" onclick="adminGenerate()">Générer le lien démo</button>
       </div>
 
       <div id="adminResult" class="admin-result" style="display:none">
@@ -674,9 +684,10 @@ function viewAdmin(){
           </div>
         </div>
         <div class="admin-note">
-          ${I.bulb} Conseil : envoyez l'invitation SharePoint <em>avant</em> le lien démo, afin que le prospect ait déjà accès au document quand il clique sur « Mon offre ».
+          ${I.bulb} Le lien SharePoint est intégré de façon sécurisée dans le lien démo. Le prospect cliquera sur « Mon offre » et téléchargera directement son document, sans authentification requise.
         </div>
       </div>
+
     </div>
   </div></div>`;
 }
@@ -684,11 +695,14 @@ function viewAdmin(){
 function adminGenerate(){
   const raw=(document.getElementById('adminCp')||{}).value||"";
   const col=(document.getElementById('adminCol')||{}).value||"CPAS";
+  const spUrl=((document.getElementById('adminSpUrl')||{}).value||"").trim();
   const cpNum=raw.replace(/\D/g,"").slice(0,4);
   if(!cpNum){alert('Veuillez saisir un code postal à 4 chiffres.');return;}
+  if(!spUrl||!spUrl.startsWith('http')){alert('Veuillez coller le lien SharePoint du fichier.');return;}
   const commune=(typeof COMMUNES!=='undefined'?COMMUNES:[]).find(c=>c.cp===cpNum);
   const fileName=col+'-'+cpNum+'.pdf';
-  const demoUrl=location.origin+location.pathname+'?c='+cpNum+'&col='+encodeURIComponent(col);
+  const encoded=btoa(spUrl);
+  const demoUrl=location.origin+location.pathname+'?c='+cpNum+'&col='+encodeURIComponent(col)+'&offer='+encoded;
   document.getElementById('adminFileName').value=fileName;
   document.getElementById('adminDemoUrl').value=demoUrl;
   document.getElementById('adminResult').style.display='block';
