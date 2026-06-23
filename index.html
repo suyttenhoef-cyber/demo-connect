@@ -92,16 +92,15 @@ nav.top a svg{opacity:.8}
 .band .wrap{padding-top:26px;padding-bottom:26px}
 .band h1{font-size:27px}
 
-/* ---------- search row (Chercher / Accueil) ---------- */
-.searchbig{background:var(--band)}
-.searchbig .wrap{padding:24px 26px}
-.search-input{background:#fff;border:1.5px solid var(--border);border-radius:11px;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 16px;box-shadow:0 1px 2px rgba(16,32,48,.04)}
-.search-input:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px var(--pill)}
-.search-input .typesel{font-size:13.5px;color:#3a4654;font-weight:500;padding:8px 14px;border-right:1px solid var(--border);white-space:nowrap}
-.search-input svg{color:#7c8896;flex-shrink:0}
-.search-input input{flex:1;border:none;outline:none;font-size:15px;padding:10px 0;color:var(--ink);background:none}
-.search-input button{background:var(--blue);color:#fff;font-weight:600;font-size:14px;padding:11px 24px;border-radius:8px}
-.search-input button:hover{background:var(--blue-dark)}
+/* ---------- search row (Chercher / Accueil) — Connect style ---------- */
+.c-search-band{background:#edf1f6;padding:18px 0;border-bottom:1px solid #d5dfe9}
+.c-search-wrap{display:flex;align-items:stretch;gap:0}
+.c-search-inner{flex:1;display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #c8d4df;border-right:none;border-radius:8px 0 0 8px;padding:0 16px}
+.c-search-inner:focus-within{border-color:var(--blue)}
+.c-search-icon{color:#7c8896;flex-shrink:0;display:flex;align-items:center}
+.c-search-field{flex:1;border:none;outline:none;font-size:15px;padding:13px 0;color:var(--ink);background:none}
+.c-search-btn{background:#1a2d45;color:#fff;font-weight:600;font-size:14px;padding:0 28px;border-radius:0 8px 8px 0;white-space:nowrap;border:none;cursor:pointer}
+.c-search-btn:hover{background:#243d5d}
 .filters{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 .filter-btn{background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13.5px;color:#3a4654;font-weight:500;display:flex;align-items:center;gap:8px}
 .filter-btn:hover{border-color:var(--blue)}
@@ -118,15 +117,28 @@ main{min-height:54vh;padding-bottom:60px}
 
 /* home layout */
 .home-grid{display:grid;grid-template-columns:1fr 330px;gap:36px}
-.feed-item{display:flex;gap:16px;padding:20px 0;border-bottom:1px solid var(--border)}
+/* updates tab still uses feed-item */
+.feed-item{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--border)}
 .feed-item:last-child{border:none}
-.thumb{width:74px;height:74px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;text-align:center;padding:6px;line-height:1.1}
 .feed-body .ftype{font-size:12px;color:var(--muted);margin:2px 0 4px;display:flex;gap:8px;align-items:center}
 .tagcat{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:2px 7px;border-radius:4px;color:#fff}
-.feed-body h3{font-size:18px;margin-bottom:5px}
+.feed-body h3{font-size:16px;margin-bottom:5px}
 .feed-body h3 a:hover{color:var(--blue);text-decoration:underline}
-.feed-body .fmeta{font-size:12.5px;color:var(--muted);margin-bottom:7px}
+.feed-body .fmeta{font-size:12.5px;color:var(--muted);margin-bottom:6px}
 .feed-body p{font-size:14px;color:#43505d}
+/* Connect-style article teasers */
+.c-teaser{display:flex;gap:18px;padding:18px 0;border-bottom:1px solid var(--border)}
+.c-teaser:last-child{border:none}
+.c-teaser__side{flex-shrink:0}
+.c-teaser__cover{display:block;cursor:pointer;border-radius:7px;overflow:hidden;line-height:0}
+.c-teaser__cover img{display:block;object-fit:cover;width:140px;height:90px;border-radius:7px;transition:opacity .15s}
+.c-teaser__cover:hover img{opacity:.88}
+.c-teaser__main{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.c-teaser__title{font-size:17px;font-weight:700;margin:0 0 5px;line-height:1.35}
+.c-teaser__title a{color:#1a2d45;text-decoration:none}
+.c-teaser__title a:hover{color:var(--blue);text-decoration:underline}
+.c-teaser__meta{font-size:12.5px;color:var(--muted);margin-bottom:7px}
+.c-teaser__body{font-size:14px;color:#43505d;line-height:1.5}
 
 /* side cards */
 .scard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:18px}
@@ -1119,10 +1131,13 @@ function viewHome(){
     feed=recent.slice(0,4).map(feedItem).join("");
   }
   return band("",`
-  <div class="searchbig" style="border:none"><div class="wrap" style="padding:0 0 4px">
-    <div class="search-input">${I.search}
-      <input id="homeSearch" placeholder="Introduisez vos termes de recherche…" onkeydown="if(event.key==='Enter')runSearch(this.value)">
-      <button onclick="runSearch(document.getElementById('homeSearch').value)">Chercher</button>
+  <div class="c-search-band"><div class="wrap">
+    <div class="c-search-wrap">
+      <div class="c-search-inner">
+        <span class="c-search-icon">${I.search}</span>
+        <input id="homeSearch" class="c-search-field" placeholder="Introduisez vos termes de recherche…" onkeydown="if(event.key==='Enter')runSearch(this.value)">
+      </div>
+      <button class="c-search-btn" onclick="runSearch(document.getElementById('homeSearch').value)">Chercher</button>
     </div>
   </div></div>
   <div class="wrap pad"><div class="home-grid">
@@ -1154,14 +1169,19 @@ function viewHome(){
   </div>`,true);
 }
 function feedItem(c){
-  return `<div class="feed-item">
-    <div class="thumb" style="background:linear-gradient(135deg,${tColor(c.type)},${tColor(c.type)}cc)">${c.type}</div>
-    <div class="feed-body">
-      <div class="ftype"><span class="tagcat" style="background:${tColor(c.type)}">${c.type}</span> ${rubName(c.rub)}</div>
-      <h3><a onclick="openContent('${c.id}')">${c.title}${c.locked?' '+lockMini():''}</a></h3>
-      <div class="fmeta">${c.date} – ${c.author}</div>
-      <p>${c.summary}</p>
-    </div></div>`;
+  const seed=c.id.replace(/-/g,'');
+  return `<article class="c-teaser">
+    <div class="c-teaser__side">
+      <a class="c-teaser__cover" onclick="openContent('${c.id}')">
+        <img src="https://picsum.photos/seed/${seed}/280/180" alt="" width="140" height="90" loading="lazy">
+      </a>
+    </div>
+    <div class="c-teaser__main">
+      <h2 class="c-teaser__title"><a onclick="openContent('${c.id}')">${c.title}${c.locked?' '+lockMini():''}</a></h2>
+      <div class="c-teaser__meta">${c.date}<span> — ${c.author}</span></div>
+      <div class="c-teaser__body">${c.summary}</div>
+    </div>
+  </article>`;
 }
 const lockMini=()=>`<span style="color:var(--lock);vertical-align:middle">${I.lock}</span>`;
 function setTab(t){HOME_TAB=t;render();}

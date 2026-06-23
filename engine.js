@@ -82,10 +82,13 @@ function viewHome(){
     feed=recent.slice(0,4).map(feedItem).join("");
   }
   return band("",`
-  <div class="searchbig" style="border:none"><div class="wrap" style="padding:0 0 4px">
-    <div class="search-input">${I.search}
-      <input id="homeSearch" placeholder="Introduisez vos termes de recherche…" onkeydown="if(event.key==='Enter')runSearch(this.value)">
-      <button onclick="runSearch(document.getElementById('homeSearch').value)">Chercher</button>
+  <div class="c-search-band"><div class="wrap">
+    <div class="c-search-wrap">
+      <div class="c-search-inner">
+        <span class="c-search-icon">${I.search}</span>
+        <input id="homeSearch" class="c-search-field" placeholder="Introduisez vos termes de recherche…" onkeydown="if(event.key==='Enter')runSearch(this.value)">
+      </div>
+      <button class="c-search-btn" onclick="runSearch(document.getElementById('homeSearch').value)">Chercher</button>
     </div>
   </div></div>
   <div class="wrap pad"><div class="home-grid">
@@ -117,14 +120,19 @@ function viewHome(){
   </div>`,true);
 }
 function feedItem(c){
-  return `<div class="feed-item">
-    <div class="thumb" style="background:linear-gradient(135deg,${tColor(c.type)},${tColor(c.type)}cc)">${c.type}</div>
-    <div class="feed-body">
-      <div class="ftype"><span class="tagcat" style="background:${tColor(c.type)}">${c.type}</span> ${rubName(c.rub)}</div>
-      <h3><a onclick="openContent('${c.id}')">${c.title}${c.locked?' '+lockMini():''}</a></h3>
-      <div class="fmeta">${c.date} – ${c.author}</div>
-      <p>${c.summary}</p>
-    </div></div>`;
+  const seed=c.id.replace(/-/g,'');
+  return `<article class="c-teaser">
+    <div class="c-teaser__side">
+      <a class="c-teaser__cover" onclick="openContent('${c.id}')">
+        <img src="https://picsum.photos/seed/${seed}/280/180" alt="" width="140" height="90" loading="lazy">
+      </a>
+    </div>
+    <div class="c-teaser__main">
+      <h2 class="c-teaser__title"><a onclick="openContent('${c.id}')">${c.title}${c.locked?' '+lockMini():''}</a></h2>
+      <div class="c-teaser__meta">${c.date}<span> — ${c.author}</span></div>
+      <div class="c-teaser__body">${c.summary}</div>
+    </div>
+  </article>`;
 }
 const lockMini=()=>`<span style="color:var(--lock);vertical-align:middle">${I.lock}</span>`;
 function setTab(t){HOME_TAB=t;render();}
