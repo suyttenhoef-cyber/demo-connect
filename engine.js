@@ -39,23 +39,19 @@ const I = {
 const LOGO_URL="Image/logo_demo.png";
 const CUBE='<img class="cube" src="'+LOGO_URL+'" alt="Vanden Broele Connect">';
 
-/* Offre personnalisée :
-   ?c=CODE_POSTAL&col=COLLECTION&offer=BASE64(url_sharepoint_public)
-   Le paramètre offer= (base64 du lien SharePoint "Toute personne") est généré
-   par la page #/admin — le commercial colle son lien, copie le résultat. */
+/* Offre personnalisée : ?c=CODE_POSTAL&col=COLLECTION
+   Le PDF est hébergé dans le dossier offres/ du repo GitHub Pages.
+   URL construite : offres/{COL}-{CP}.pdf (relative, fonctionne en local et en prod) */
 const OFFER_PARAMS=(()=>{
   try{
     const p=new URLSearchParams(window.location.search);
     const c=p.get('c');
-    const offerB64=p.get('offer');
-    if(!c&&!offerB64)return null;
+    if(!c)return null;
     const col=(p.get('col')||'CPAS').toUpperCase();
-    const commune=(typeof COMMUNES!=='undefined'?COMMUNES:[]).find(x=>x.cp===(c||''));
-    let url=null;
-    if(offerB64){try{url=atob(offerB64);}catch(e){url=null;}}
-    if(!url&&c&&(TENANT.sharePoint||{}).base)url=TENANT.sharePoint.base+col+'-'+c+'.pdf';
-    if(!url)return null;
-    return{cp:c,col,commune:commune||{cp:c||'',nom:c||''},url,fileName:col+'-'+(c||'')+'.pdf'};
+    const commune=(typeof COMMUNES!=='undefined'?COMMUNES:[]).find(x=>x.cp===c);
+    const fileName=col+'-'+c+'.pdf';
+    const url='offres/'+fileName;
+    return{cp:c,col,commune:commune||{cp:c,nom:c},url,fileName};
   }catch(e){return null;}
 })();
 
@@ -622,26 +618,27 @@ function runSearch(q){if(q&&q.trim()){SF_TYPE="Tous";go("chercher?q="+encodeURIC
 /* ---- PAGE ADMIN : générateur de liens démo ---- */
 function viewAdmin(){
   const cols=(TENANT.collections||["CPAS","DG","FINANCES","RH","TECHNIQUE","URBANISME"]);
+  const ghUpload='https://github.com/suyttenhoef-cyber/demo-connect/upload/master/offres';
   return `<div class="admin-page">
   <div class="admin-banner">
     <div class="wrap"><h1>Générateur de lien démo</h1>
-    <p>Remplissez les champs, collez le lien SharePoint du fichier, et copiez le lien à envoyer au prospect.</p></div>
+    <p>Préparez le PDF, déposez-le sur GitHub, générez le lien prospect. Aucune modification de code.</p></div>
   </div>
   <div class="wrap pad">
     <div class="admin-card">
 
       <div class="admin-steps">
         <div class="admin-step"><span class="admin-step-n">1</span><div>
-          <strong>Préparez et déposez le PDF</strong>
-          <span>Nommez-le selon la nomenclature et déposez-le dans le dossier SharePoint <code>offres-demo/</code>.</span>
+          <strong>Générez le nom de fichier</strong>
+          <span>Remplissez les champs ci-dessous et cliquez sur <em>Générer</em> pour obtenir le nom exact à utiliser.</span>
         </div></div>
         <div class="admin-step"><span class="admin-step-n">2</span><div>
-          <strong>Créez un lien de partage SharePoint</strong>
-          <span>Clic droit sur le fichier → <em>Partager</em> → <em>Toute personne disposant du lien peut afficher</em> → Copier le lien.</span>
+          <strong>Déposez le PDF sur GitHub</strong>
+          <span>Renommez votre PDF selon le nom généré, puis déposez-le via le bouton ci-dessous (glisser-déposer dans GitHub).</span>
         </div></div>
         <div class="admin-step"><span class="admin-step-n">3</span><div>
-          <strong>Générez et envoyez le lien démo</strong>
-          <span>Collez le lien SharePoint ci-dessous, cliquez sur Générer, puis transmettez le lien démo au prospect.</span>
+          <strong>Envoyez le lien démo au prospect</strong>
+          <span>Copiez le lien généré et transmettez-le. Le prospect cliquera sur « Mon offre » pour télécharger son document.</span>
         </div></div>
       </div>
 
@@ -661,30 +658,32 @@ function viewAdmin(){
             </select>
           </div>
         </div>
-        <div class="admin-row">
-          <label for="adminSpUrl">Lien SharePoint du fichier <span class="admin-label-hint">(lien "Toute personne disposant du lien")</span></label>
-          <input id="adminSpUrl" placeholder="https://vandenbroele1.sharepoint.com/:b:/s/...?e=...">
-        </div>
-        <button class="btn btn-b admin-gen-btn" onclick="adminGenerate()">Générer le lien démo</button>
+        <button class="btn btn-b admin-gen-btn" onclick="adminGenerate()">Générer</button>
       </div>
 
       <div id="adminResult" class="admin-result" style="display:none">
         <div class="admin-res-row">
-          <label>Nom du fichier à déposer dans SharePoint</label>
+          <label>1 — Nom exact du fichier PDF</label>
           <div class="admin-copy-wrap">
             <input id="adminFileName" class="admin-copy-input" readonly>
             <button class="admin-copy-btn" onclick="adminCopy('adminFileName',this)">Copier</button>
           </div>
         </div>
         <div class="admin-res-row">
-          <label>Lien démo à envoyer au prospect</label>
+          <label>2 — Déposer le PDF sur GitHub (glisser-déposer)</label>
+          <a id="adminGhLink" class="btn btn-b" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-size:13.5px;padding:9px 18px" href="${ghUpload}" target="_blank">
+            ${I.doc} Ouvrir le dépôt GitHub → dossier offres/
+          </a>
+        </div>
+        <div class="admin-res-row">
+          <label>3 — Lien démo à envoyer au prospect</label>
           <div class="admin-copy-wrap">
             <input id="adminDemoUrl" class="admin-copy-input" readonly>
             <button class="admin-copy-btn" onclick="adminCopy('adminDemoUrl',this)">Copier</button>
           </div>
         </div>
         <div class="admin-note">
-          ${I.bulb} Le lien SharePoint est intégré de façon sécurisée dans le lien démo. Le prospect cliquera sur « Mon offre » et téléchargera directement son document, sans authentification requise.
+          ${I.bulb} Après avoir déposé le PDF sur GitHub, attendez environ 1 minute que le site se mette à jour avant d'envoyer le lien au prospect.
         </div>
       </div>
 
@@ -695,14 +694,11 @@ function viewAdmin(){
 function adminGenerate(){
   const raw=(document.getElementById('adminCp')||{}).value||"";
   const col=(document.getElementById('adminCol')||{}).value||"CPAS";
-  const spUrl=((document.getElementById('adminSpUrl')||{}).value||"").trim();
   const cpNum=raw.replace(/\D/g,"").slice(0,4);
   if(!cpNum){alert('Veuillez saisir un code postal à 4 chiffres.');return;}
-  if(!spUrl||!spUrl.startsWith('http')){alert('Veuillez coller le lien SharePoint du fichier.');return;}
   const commune=(typeof COMMUNES!=='undefined'?COMMUNES:[]).find(c=>c.cp===cpNum);
   const fileName=col+'-'+cpNum+'.pdf';
-  const encoded=btoa(spUrl);
-  const demoUrl=location.origin+location.pathname+'?c='+cpNum+'&col='+encodeURIComponent(col)+'&offer='+encoded;
+  const demoUrl=location.origin+location.pathname+'?c='+cpNum+'&col='+encodeURIComponent(col);
   document.getElementById('adminFileName').value=fileName;
   document.getElementById('adminDemoUrl').value=demoUrl;
   document.getElementById('adminResult').style.display='block';
